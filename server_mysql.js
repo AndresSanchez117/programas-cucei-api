@@ -38,6 +38,6 @@ app.post('/carreras', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.listen(8000, () => {
-  console.log('Server on http://localhost:8000')
+app.listen(process.env.PORT, () => {
+  console.log(`Server on http://localhost:${process.env.PORT}`)
 })

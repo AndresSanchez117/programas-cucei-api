@@ -1,4 +1,7 @@
 {
+  "name": "express-test",
+  "version": "1.0.0",
+  "main": "server_mysql.js",
   "dependencies": {
     "body-parser": "^1.20.0",
     "dotenv": "^16.0.1",
@@ -7,11 +10,9 @@
     "morgan": "^1.10.0",
     "mysql": "^2.18.1"
   },
-  "name": "express-test",
-  "version": "1.0.0",
-  "main": "server_mysql.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server_mysql.js"
   },
   "keywords": [],
   "author": "",
