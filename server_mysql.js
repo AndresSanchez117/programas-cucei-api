@@ -3,11 +3,13 @@ require('dotenv').config()
 const express = require('express')
 const bp = require('body-parser')
 const morgan = require('morgan')
+const cors = require('cors')
 const { databaseService } = require('./databaseService')
 
 const app = express()
 const dbService = databaseService()
 
+app.use(cors())
 app.use(bp.urlencoded({ extended: true }))
 app.use(bp.json())
 app.use(morgan('dev'))
