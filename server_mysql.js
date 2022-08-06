@@ -16,7 +16,7 @@ app.use(morgan('dev'))
 
 // ROUTES
 
-app.get('/login', (req, res) => {
+app.post('/login', (req, res) => {
   dbService.login(req.body)
     .then(estudiante => res.json(estudiante))
     .catch(e => res.status(500).send(e))
@@ -38,6 +38,34 @@ app.post('/carreras', (req, res) => {
   dbService.postCarreras(req.body)
     .then(() => res.json({ mensaje: "Carrera creada." }))
     .catch(e => res.status(500).send(e))
+})
+
+app.post('/programas', (req, res) => {
+
+})
+
+app.get('/programas/asesorias', (req, res) => {
+
+})
+
+app.get('/programas/practicas', (req, res) => {
+
+})
+
+app.get('/programas/becas', (req, res) => {
+
+})
+
+app.get('/programas/intercambios', (req, res) => {
+
+})
+
+app.get('/programas/pasantias', (req, res) => {
+
+})
+
+app.get('/programas/trabajos', (req, res) => {
+
 })
 
 app.listen(process.env.PORT, () => {

@@ -55,6 +55,37 @@ const databaseService = () => {
     })
   }
 
+  // PROGRAMAS
+
+  // TODO: Agregar imagen
+  const postProgramas = ({ nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
+
+  }
+
+  const getProgramasAsesorias = () => {
+
+  }
+
+  const getProgramasPracticas = () => {
+
+  }
+
+  const getProgramasBecas = () => {
+
+  }
+
+  const getProgramasIntercambios = () => {
+
+  }
+
+  const getProgramasPasantias = () => {
+
+  }
+
+  const getProgramasTrabajos = () => {
+
+  }
+
   return {
     login,
     getEstudiante,
