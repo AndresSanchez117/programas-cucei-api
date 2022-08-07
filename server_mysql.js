@@ -41,31 +41,43 @@ app.post('/carreras', (req, res) => {
 })
 
 app.post('/programas', (req, res) => {
-
+  dbService.postProgramas(req.body)
+    .then(() => res.json({ mensaje: "Programa creado." }))
+    .catch(e => res.status(500).send(e))
 })
 
-app.get('/programas/asesorias', (req, res) => {
+app.get('/programas/:tipo', (req, res) => {
+  dbService.getProgramasporTipo(req.params)
+    .then(programas => {
+      resultado = []
 
-})
+      programas.forEach(p => {
+        const programIndex = resultado.findIndex(el => el.id === p.id)
 
-app.get('/programas/practicas', (req, res) => {
+        if (programIndex !== -1) {
+          const resultProgram = resultado[programIndex]
+          resultProgram.carreras.push(p.clave_carrera)
+          resultado[programIndex] = resultProgram
+        }
+        else {
+          const { id, nombre, descripcion, telefono, correo, institucion, imagen, tipo, clave_carrera } = p
+          resultado.push({
+            id,
+            nombre,
+            descripcion,
+            telefono,
+            correo,
+            institucion,
+            imagen,
+            tipo,
+            carreras: clave_carrera ? [clave_carrera] : null
+          })
+        }
+      })
 
-})
-
-app.get('/programas/becas', (req, res) => {
-
-})
-
-app.get('/programas/intercambios', (req, res) => {
-
-})
-
-app.get('/programas/pasantias', (req, res) => {
-
-})
-
-app.get('/programas/trabajos', (req, res) => {
-
+      res.json(resultado)
+    })
+    .catch(e => res.status(500).send(e))
 })
 
 app.listen(process.env.PORT, () => {

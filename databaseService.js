@@ -59,31 +59,43 @@ const databaseService = () => {
 
   // TODO: Agregar imagen
   const postProgramas = ({ nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
-
+    return knex.transaction(trx => {
+      return trx('Programa').insert({
+        nombre,
+        descripcion,
+        telefono,
+        correo,
+        institucion,
+        tipo
+      }).then(ids => {
+        carreras.forEach(carrera => carrera.id_programa = ids[0])
+        return trx('Programa_carrera').insert(carreras)
+      })
+    })
   }
 
-  const getProgramasAsesorias = () => {
-
-  }
-
-  const getProgramasPracticas = () => {
-
-  }
-
-  const getProgramasBecas = () => {
-
-  }
-
-  const getProgramasIntercambios = () => {
-
-  }
-
-  const getProgramasPasantias = () => {
-
-  }
-
-  const getProgramasTrabajos = () => {
-
+  const getProgramasporTipo = ({ tipo }) => {
+    return knex('Programa')
+      .leftOuterJoin(
+        'Programa_carrera',
+        'Programa_carrera.id_programa',
+        '=',
+        'Programa.id')
+      .where({
+        tipo,
+        'Programa.estado': 0
+      })
+      .select(
+        'Programa.id',
+        'Programa.nombre',
+        'Programa.descripcion',
+        'Programa.telefono',
+        'Programa.correo',
+        'Programa.institucion',
+        'Programa.imagen',
+        'Programa.tipo',
+        'Programa_carrera.clave_carrera'
+      )
   }
 
   return {
@@ -91,7 +103,9 @@ const databaseService = () => {
     getEstudiante,
     postEstudiante,
     getCarreras,
-    postCarreras
+    postCarreras,
+    postProgramas,
+    getProgramasporTipo
   }
 }
 
