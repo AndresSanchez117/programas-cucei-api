@@ -80,6 +80,40 @@ app.get('/programas/:tipo', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
+app.get('/programa/:id', (req, res) => {
+  dbService.getPrograma(req.params)
+    .then(programa => {
+      resultado = []
+
+      programa.forEach(p => {
+        const programIndex = resultado.findIndex(el => el.id === p.id)
+
+        if (programIndex !== -1) {
+          const resultProgram = resultado[programIndex]
+          resultProgram.carreras.push(p.clave_carrera)
+          resultado[programIndex] = resultProgram
+        }
+        else {
+          const { id, nombre, descripcion, telefono, correo, institucion, imagen, tipo, clave_carrera } = p
+          resultado.push({
+            id,
+            nombre,
+            descripcion,
+            telefono,
+            correo,
+            institucion,
+            imagen,
+            tipo,
+            carreras: clave_carrera ? [clave_carrera] : null
+          })
+        }
+      })
+
+      res.json(resultado)
+    })
+    .catch(e => res.status(500).send(e))
+})
+
 app.listen(process.env.PORT, () => {
   console.log(`Server on http://localhost:${process.env.PORT}`)
 })

@@ -98,6 +98,30 @@ const databaseService = () => {
       )
   }
 
+  const getPrograma = ({ id }) => {
+    return knex('Programa')
+      .leftOuterJoin(
+        'Programa_carrera',
+        'Programa_carrera.id_programa',
+        '=',
+        'Programa.id')
+      .where({
+        'Programa.id': id,
+        'Programa.estado': 0
+      })
+      .select(
+        'Programa.id',
+        'Programa.nombre',
+        'Programa.descripcion',
+        'Programa.telefono',
+        'Programa.correo',
+        'Programa.institucion',
+        'Programa.imagen',
+        'Programa.tipo',
+        'Programa_carrera.clave_carrera'
+      )
+  }
+
   return {
     login,
     getEstudiante,
@@ -105,7 +129,8 @@ const databaseService = () => {
     getCarreras,
     postCarreras,
     postProgramas,
-    getProgramasporTipo
+    getProgramasporTipo,
+    getPrograma
   }
 }
 
