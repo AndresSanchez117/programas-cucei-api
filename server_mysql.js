@@ -80,7 +80,7 @@ app.get('/programas/:tipo', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.get('/programa/:id', (req, res) => {
+app.get('/programa/:tipo/:id', (req, res) => {
   dbService.getPrograma(req.params)
     .then(programa => {
       resultado = []
