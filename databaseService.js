@@ -22,7 +22,7 @@ const databaseService = () => {
   // ESTUDIANTE
 
   const getEstudiante = () => {
-
+    // TODO: hacer más tarde
   }
 
   const postEstudiante = ({ codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
