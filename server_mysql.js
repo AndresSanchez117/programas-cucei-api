@@ -28,7 +28,7 @@ app.post('/estudiante', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.put('/editar', (req, res) => {
+app.put('/editar/:codigo', (req, res) => {
   dbService.putEditar(req.body)
     .then(() => res.json({ mensaje: "Estudiante editado." }))
     .catch(e => res.status(500).send(e))
