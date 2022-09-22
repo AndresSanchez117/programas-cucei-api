@@ -40,7 +40,7 @@ const databaseService = () => {
     })
   }
 
-  const postEditar = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
+  const putEditar = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
     return knex('Estudiante')
     .where({
       'Estudiante.codigo': codigoOri
@@ -150,7 +150,7 @@ const databaseService = () => {
     postProgramas,
     getProgramasporTipo,
     getPrograma,
-    postEditar
+    putEditar
   }
 }
 

@@ -28,8 +28,8 @@ app.post('/estudiante', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.post('/editar', (req, res) => {
-  dbService.postEditar(req.body)
+app.put('/editar', (req, res) => {
+  dbService.putEditar(req.body)
     .then(() => res.json({ mensaje: "Estudiante editado." }))
     .catch(e => res.status(500).send(e))
 })
