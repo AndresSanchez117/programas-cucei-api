@@ -40,6 +40,25 @@ const databaseService = () => {
     })
   }
 
+  const postEditar = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
+    return knex('Estudiante')
+    .where({
+      'Estudiante.codigo': codigoOri
+    })
+    .update({
+      codigo: codigo,
+      nombre: nombre,
+      primer_apellido: primer_apellido,
+      segundo_apellido: segundo_apellido,
+      contrasena: contrasena,
+      clave_carrera: clave_carrera,
+      ciclo_escolar: ciclo_escolar,
+      num_semestre: num_semestre,
+      estatus: estatus,
+      correo_estudiante: correo_estudiante
+    })
+  }
+
   // CARRERAS
 
   const getCarreras = () => {
@@ -130,7 +149,8 @@ const databaseService = () => {
     postCarreras,
     postProgramas,
     getProgramasporTipo,
-    getPrograma
+    getPrograma,
+    postEditar
   }
 }
 
