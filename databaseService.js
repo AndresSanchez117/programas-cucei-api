@@ -40,17 +40,17 @@ const databaseService = () => {
     })
   }
 
-  const postAdministrador = ({ nombre, primer_apellido, segundo_apellido, contrasena, correo_estudiante }) => {
+  const postAdministrador = ({ nombre, primer_apellido, segundo_apellido, correo, contrasena }) => {
     return knex('Administrador').insert({
-      nombre: nombre,
-      primer_apellido: primer_apellido,
-      segundo_apellido: segundo_apellido,
-      contrasena: contrasena,
-      correo_estudiante: correo_estudiante
+      nombre,
+      primer_apellido,
+      segundo_apellido,
+      correo,
+      contrasena
     })
   }
 
-  const putEditar = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
+  const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
     return knex('Estudiante')
       .where({
         'Estudiante.codigo': codigoOri
@@ -161,7 +161,6 @@ const databaseService = () => {
     postProgramas,
     getProgramasporTipo,
     getPrograma,
-    putEditar,
     postAdministrador
   }
 }

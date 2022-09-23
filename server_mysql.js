@@ -34,8 +34,8 @@ app.post('/administrador', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.put('/editar/:codigo', (req, res) => {
-  dbService.putEditar(req.body)
+app.patch('/estudiante', (req, res) => {
+  dbService.patchEstudiante(req.body)
     .then(() => res.json({ mensaje: "Estudiante editado." }))
     .catch(e => res.status(500).send(e))
 })
