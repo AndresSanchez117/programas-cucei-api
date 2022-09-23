@@ -40,6 +40,16 @@ const databaseService = () => {
     })
   }
 
+  const postAdministrador = ({ nombre, primer_apellido, segundo_apellido, contrasena, correo_estudiante }) => {
+    return knex('Administrador').insert({
+      nombre: nombre,
+      primer_apellido: primer_apellido,
+      segundo_apellido: segundo_apellido,
+      contrasena: contrasena,
+      correo_estudiante: correo_estudiante
+    })
+  }
+
   const putEditar = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
     return knex('Estudiante')
     .where({
@@ -150,7 +160,8 @@ const databaseService = () => {
     postProgramas,
     getProgramasporTipo,
     getPrograma,
-    putEditar
+    putEditar,
+    postAdministrador    
   }
 }
 
