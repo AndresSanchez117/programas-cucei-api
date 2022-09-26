@@ -18,7 +18,7 @@ app.use(bp.json())
 app.use(morgan('dev'))
 
 // s3 client
-const s3 = new S3Client({})
+const s3 = new S3Client({ region: process.env.AWS_REGION })
 
 // only store image on memory
 const storage = multer.memoryStorage()
