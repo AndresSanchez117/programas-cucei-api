@@ -21,8 +21,11 @@ const databaseService = () => {
 
   // ESTUDIANTE
 
-  const getEstudiante = () => {
-    // TODO: hacer más tarde
+  const getEstudiante = ({ codigo }) => {
+    return knex('Estudiante').where({
+      codigo,
+      estado: 0
+    }).select()
   }
 
   const postEstudiante = ({ codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
@@ -50,7 +53,7 @@ const databaseService = () => {
     })
   }
 
-  const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
+  const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante, foto }) => {
     return knex('Estudiante')
       .where({
         'Estudiante.codigo': codigoOri
@@ -65,7 +68,8 @@ const databaseService = () => {
         ciclo_escolar: ciclo_escolar,
         num_semestre: num_semestre,
         estatus: estatus,
-        correo_estudiante: correo_estudiante
+        correo_estudiante: correo_estudiante,
+        foto
       })
   }
 
