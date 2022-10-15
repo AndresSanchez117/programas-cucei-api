@@ -21,7 +21,7 @@ const databaseService = () => {
 
   // ESTUDIANTE
 
-  const getEstudiante = ({ codigo }) => {
+  const postEstudianteDatos = ({ codigo }) => {
     return knex('Estudiante').where({
       codigo,
       estado: 0
@@ -90,7 +90,6 @@ const databaseService = () => {
 
   // PROGRAMAS
 
-  // TODO: Agregar imagen
   const postProgramas = ({ nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
     return knex.transaction(trx => {
       return trx('Programa').insert({
@@ -101,11 +100,25 @@ const databaseService = () => {
         institucion,
         tipo
       }).then(ids => {
-        carreras.forEach(carrera => carrera.id_programa = ids[0])
-        return trx('Programa_carrera').insert(carreras)
+        let carrerasObj = []
+        carreras.forEach(carrera => carrerasObj.push({ 'clave_carrera': carrera, 'id_programa': ids[0] }))
+        return trx('Programa_carrera').insert(carrerasObj)
       })
     })
   }
+
+  // {
+  //   "nombre": "Prueba de arreglo",
+  //   "descripcion": "Alguna descripción",
+  //   "telefono": 33442345,
+  //   "correo": "correo@gmail.com",
+  //   "institucion": "Universidad de Guadalajara",
+  //   "tipo": "Beca",
+  //   "carreras": [
+  //     {"clave_carrera": "INCO"},
+  //     {"clave_carrera": "INNI"}
+  //   ]
+  // }
 
   const getProgramasporTipo = ({ tipo }) => {
     return knex('Programa')
@@ -125,7 +138,6 @@ const databaseService = () => {
         'Programa.telefono',
         'Programa.correo',
         'Programa.institucion',
-        'Programa.imagen',
         'Programa.tipo',
         'Programa_carrera.clave_carrera'
       )
@@ -149,15 +161,18 @@ const databaseService = () => {
         'Programa.telefono',
         'Programa.correo',
         'Programa.institucion',
-        'Programa.imagen',
         'Programa.tipo',
         'Programa_carrera.clave_carrera'
       )
   }
 
+  const getLastProgramID = () => {
+    return knex('Programa').max('id', { as: 'id' })
+  }
+
   return {
     login,
-    getEstudiante,
+    postEstudianteDatos,
     postEstudiante,
     patchEstudiante,
     getCarreras,
@@ -165,7 +180,8 @@ const databaseService = () => {
     postProgramas,
     getProgramasporTipo,
     getPrograma,
-    postAdministrador
+    postAdministrador,
+    getLastProgramID
   }
 }
 

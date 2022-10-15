@@ -5,9 +5,8 @@ const bp = require('body-parser')
 const morgan = require('morgan')
 const cors = require('cors')
 const multer = require('multer')
-const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3")
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
 const { databaseService } = require('./databaseService')
+const s3Client = require('./s3Client')
 
 const app = express()
 const dbService = databaseService()
@@ -16,9 +15,6 @@ app.use(cors())
 app.use(bp.urlencoded({ extended: true }))
 app.use(bp.json())
 app.use(morgan('dev'))
-
-// s3 client
-const s3 = new S3Client({ region: process.env.AWS_REGION })
 
 // only store image on memory
 const storage = multer.memoryStorage()
@@ -29,32 +25,23 @@ const upload = multer({ storage: storage })
 app.post('/login', (req, res) => {
   dbService.login(req.body)
     .then(async (estudiante) => {
-      // TODO: extract function to get a presigned image url from an image key
-      const getObjectParams = {
-        Bucket: process.env.BUCKET_NAME,
-        Key: estudiante[0].foto
-      }
-      const command = new GetObjectCommand(getObjectParams)
-      const imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
+      const imgKey = estudiante[0].foto
+      const imgUrl = await s3Client.getImgURL(imgKey)
 
-      estudiante[0].foto = imageUrl
+      estudiante[0].foto = imgUrl
 
       res.json(estudiante)
     })
     .catch(e => res.status(500).send(e))
 })
 
-app.get('/estudiante/:codigo', (req, res) => {
-  dbService.getEstudiante(req.params)
+app.post('/estudianteDatos', (req, res) => {
+  dbService.postEstudianteDatos(req.body)
     .then(async (estudiante) => {
-      const getObjectParams = {
-        Bucket: process.env.BUCKET_NAME,
-        Key: estudiante[0].foto
-      }
-      const command = new GetObjectCommand(getObjectParams)
-      const imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
+      const imgKey = estudiante[0].foto
+      const imgUrl = await s3Client.getImgURL(imgKey)
 
-      estudiante[0].foto = imageUrl
+      estudiante[0].foto = imgUrl
 
       res.json(estudiante)
     })
@@ -78,15 +65,7 @@ app.patch('/estudiante', upload.single('foto'), async (req, res) => {
   if (req.file) {
     const codigoFinal = req.body.codigo ? req.body.codigo : req.body.codigoOri
     const imgKey = `${codigoFinal}/perfil`
-    const params = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: imgKey,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype
-    }
-
-    const command = new PutObjectCommand(params)
-    await s3.send(command)
+    await s3Client.upload(req.file, imgKey)
 
     req.body.foto = imgKey
   }
@@ -108,40 +87,54 @@ app.post('/carreras', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.post('/programas', (req, res) => {
+// TODO: drop 'imagen' column from program table
+app.post('/programas', upload.single('foto'), (req, res) => {
   dbService.postProgramas(req.body)
-    .then(() => res.json({ mensaje: "Programa creado." }))
+    .then(() => {
+      dbService.getLastProgramID().then(async (ids) => {
+        const programID = ids[0].id
+        const imgKey = `programa/${programID}`
+        await s3Client.upload(req.file, imgKey)
+
+        res.json({ mensaje: "Programa creado." })
+      })
+    })
     .catch(e => res.status(500).send(e))
 })
 
 app.get('/programas/:tipo', (req, res) => {
   dbService.getProgramasporTipo(req.params)
-    .then(programas => {
-      resultado = []
+    .then(async programas => {
+      let resultado = []
 
-      programas.forEach(p => {
-        const programIndex = resultado.findIndex(el => el.id === p.id)
+      for (let p of programas) {
+        try {
+          const programIndex = resultado.findIndex(el => el.id === p.id)
 
-        if (programIndex !== -1) {
-          const resultProgram = resultado[programIndex]
-          resultProgram.carreras.push(p.clave_carrera)
-          resultado[programIndex] = resultProgram
+          if (programIndex !== -1) {
+            const resultProgram = resultado[programIndex]
+            resultProgram.carreras.push(p.clave_carrera)
+            resultado[programIndex] = resultProgram
+          }
+          else {
+            const { id, nombre, descripcion, telefono, correo, institucion, tipo, clave_carrera } = p
+            const imagen = await s3Client.getImgURL(`programa/${id}`)
+            resultado.push({
+              id,
+              nombre,
+              descripcion,
+              telefono,
+              correo,
+              institucion,
+              imagen,
+              tipo,
+              carreras: clave_carrera ? [clave_carrera] : null
+            })
+          }
+        } catch (error) {
+          console.log('error' + error);
         }
-        else {
-          const { id, nombre, descripcion, telefono, correo, institucion, imagen, tipo, clave_carrera } = p
-          resultado.push({
-            id,
-            nombre,
-            descripcion,
-            telefono,
-            correo,
-            institucion,
-            imagen,
-            tipo,
-            carreras: clave_carrera ? [clave_carrera] : null
-          })
-        }
-      })
+      }
 
       res.json(resultado)
     })
@@ -150,32 +143,40 @@ app.get('/programas/:tipo', (req, res) => {
 
 app.get('/programa/:tipo/:id', (req, res) => {
   dbService.getPrograma(req.params)
-    .then(programa => {
-      resultado = []
+    .then(async programa => {
+      //console.log(programa)
+      let resultado = []
 
-      programa.forEach(p => {
-        const programIndex = resultado.findIndex(el => el.id === p.id)
+      for (let p of programa) {
+        try {
+          const programIndex = resultado.findIndex(el => el.id === p.id)
 
-        if (programIndex !== -1) {
-          const resultProgram = resultado[programIndex]
-          resultProgram.carreras.push(p.clave_carrera)
-          resultado[programIndex] = resultProgram
+          if (programIndex !== -1) {
+            const resultProgram = resultado[programIndex]
+            resultProgram.carreras.push(p.clave_carrera)
+            resultado[programIndex] = resultProgram
+          }
+          else {
+            const { id, nombre, descripcion, telefono, correo, institucion, tipo, clave_carrera } = p
+            const imgKey = `programa/${id}`
+            const imagen = await s3Client.getImgURL(imgKey)
+            console.log(imagen)
+            resultado.push({
+              id,
+              nombre,
+              descripcion,
+              telefono,
+              correo,
+              institucion,
+              imagen,
+              tipo,
+              carreras: clave_carrera ? [clave_carrera] : null
+            })
+          }
+        } catch (error) {
+          console.log('error' + error);
         }
-        else {
-          const { id, nombre, descripcion, telefono, correo, institucion, imagen, tipo, clave_carrera } = p
-          resultado.push({
-            id,
-            nombre,
-            descripcion,
-            telefono,
-            correo,
-            institucion,
-            imagen,
-            tipo,
-            carreras: clave_carrera ? [clave_carrera] : null
-          })
-        }
-      })
+      }
 
       res.json(resultado)
     })
