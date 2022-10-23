@@ -19,6 +19,10 @@ const databaseService = () => {
     }).select()
   }
 
+  const loginAdministrador = ({ correo, constrasena }) => {
+    // TODO
+  }
+
   // ESTUDIANTE
 
   const postEstudianteDatos = ({ codigo }) => {
@@ -43,16 +47,6 @@ const databaseService = () => {
     })
   }
 
-  const postAdministrador = ({ nombre, primer_apellido, segundo_apellido, correo, contrasena }) => {
-    return knex('Administrador').insert({
-      nombre,
-      primer_apellido,
-      segundo_apellido,
-      correo,
-      contrasena
-    })
-  }
-
   const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante, foto }) => {
     return knex('Estudiante')
       .where({
@@ -71,6 +65,22 @@ const databaseService = () => {
         correo_estudiante: correo_estudiante,
         foto
       })
+  }
+
+  // ADMINISTRADOR
+
+  const postAdministrador = ({ nombre, primer_apellido, segundo_apellido, correo, contrasena }) => {
+    return knex('Administrador').insert({
+      nombre,
+      primer_apellido,
+      segundo_apellido,
+      correo,
+      contrasena
+    })
+  }
+
+  const patchAdministrador = ({ id, nombre, primer_apellido, segundo_apellido, correo, contrasena }) => {
+    // TODO
   }
 
   // CARRERAS
@@ -107,18 +117,13 @@ const databaseService = () => {
     })
   }
 
-  // {
-  //   "nombre": "Prueba de arreglo",
-  //   "descripcion": "Alguna descripción",
-  //   "telefono": 33442345,
-  //   "correo": "correo@gmail.com",
-  //   "institucion": "Universidad de Guadalajara",
-  //   "tipo": "Beca",
-  //   "carreras": [
-  //     {"clave_carrera": "INCO"},
-  //     {"clave_carrera": "INNI"}
-  //   ]
-  // }
+  const patchProgrmas = ({ id, nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
+    // TODO
+  }
+
+  const deleteProgramas = ({ id }) => {
+    // TODO
+  }
 
   const getProgramasporTipo = ({ tipo }) => {
     return knex('Programa')
@@ -168,6 +173,25 @@ const databaseService = () => {
 
   const getLastProgramID = () => {
     return knex('Programa').max('id', { as: 'id' })
+  }
+
+  const postRegistro = ({ codigo_estudiante, id_programa, fecha_registro }) => {
+    // TODO
+  }
+
+  // FAVORITOS
+
+  const postGuardarFavoritos = ({ codigo_estudiante, id_programa }) => {
+    // TODO
+  }
+
+  // ? should this be post
+  const postObtenerFavoritos = ({ codigo_estudiante }) => {
+    // TODO
+  }
+
+  const deleteFavoritos = ({ codigo_estudiante, id_programa }) => {
+    // TODO
   }
 
   return {

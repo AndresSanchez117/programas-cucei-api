@@ -35,6 +35,12 @@ app.post('/login', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
+// TODO: retornar imagen por defecto
+app.post('/loginAdministrador', (req, res) => {
+  dbService.loginAdministrador(req.body)
+    .then()
+})
+
 app.post('/estudianteDatos', (req, res) => {
   dbService.postEstudianteDatos(req.body)
     .then(async (estudiante) => {
@@ -58,6 +64,10 @@ app.post('/administrador', (req, res) => {
   dbService.postAdministrador(req.body)
     .then(() => res.json({ mensaje: "Administrador creado." }))
     .catch(e => res.status(500).send(e))
+})
+
+app.patch('/administrador', (req, res) => {
+  // TODO
 })
 
 app.patch('/estudiante', upload.single('foto'), async (req, res) => {
@@ -100,6 +110,14 @@ app.post('/programas', upload.single('foto'), (req, res) => {
       })
     })
     .catch(e => res.status(500).send(e))
+})
+
+app.patch('/programas', upload.single('foto'), (req, res) => {
+  // TODO
+})
+
+app.delete('/programas', (req, res) => {
+  // TODO
 })
 
 app.get('/programas/:tipo', (req, res) => {
@@ -182,6 +200,25 @@ app.get('/programa/:tipo/:id', (req, res) => {
     })
     .catch(e => res.status(500).send(e))
 })
+
+app.post('/guardarFavoritos', (req, res) => {
+  // TODO
+})
+
+// ? should this be post
+app.post('/obtenerFavoritos', (req, res) => {
+  // TODO
+})
+
+app.delete('/eliminarFavoritos', (req, res) => {
+  // TODO
+})
+
+app.post('/registro', (req, res) => {
+  // TODO
+})
+
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Server on http://localhost:${process.env.PORT}`)
