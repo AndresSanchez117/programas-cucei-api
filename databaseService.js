@@ -10,6 +10,7 @@ const databaseService = () => {
     }
   })
 
+  // TODO: Encrypt passwords
   // LOGIN
   const login = ({ correo_estudiante, contrasena }) => {
     return knex('Estudiante').where({
@@ -19,8 +20,12 @@ const databaseService = () => {
     }).select()
   }
 
-  const loginAdministrador = ({ correo, constrasena }) => {
-    // TODO
+  const loginAdministrador = ({ correo, contrasena }) => {
+    return knex('Administrador').where({
+      correo,
+      contrasena,
+      estado: 0
+    }).select()
   }
 
   // ESTUDIANTE
@@ -80,7 +85,17 @@ const databaseService = () => {
   }
 
   const patchAdministrador = ({ id, nombre, primer_apellido, segundo_apellido, correo, contrasena }) => {
-    // TODO
+    return knex('Administrador')
+      .where({
+        id
+      })
+      .update({
+        nombre,
+        primer_apellido,
+        segundo_apellido,
+        correo,
+        contrasena
+      })
   }
 
   // CARRERAS
@@ -117,7 +132,7 @@ const databaseService = () => {
     })
   }
 
-  const patchProgrmas = ({ id, nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
+  const patchProgramas = ({ id, nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
     // TODO
   }
 
@@ -185,7 +200,6 @@ const databaseService = () => {
     // TODO
   }
 
-  // ? should this be post
   const postObtenerFavoritos = ({ codigo_estudiante }) => {
     // TODO
   }
@@ -196,6 +210,7 @@ const databaseService = () => {
 
   return {
     login,
+    loginAdministrador,
     postEstudianteDatos,
     postEstudiante,
     patchEstudiante,
@@ -205,6 +220,7 @@ const databaseService = () => {
     getProgramasporTipo,
     getPrograma,
     postAdministrador,
+    patchAdministrador,
     getLastProgramID
   }
 }

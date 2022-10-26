@@ -32,13 +32,31 @@ app.post('/login', (req, res) => {
 
       res.json(estudiante)
     })
-    .catch(e => res.status(500).send(e))
+    .catch(e => {
+      if (e.name === 'TypeError') {
+        res.status(401).send({ mensaje: "Datos incorrectos." })
+      }
+      else {
+        res.status(500).send(e)
+      }
+    })
 })
 
-// TODO: retornar imagen por defecto
 app.post('/loginAdministrador', (req, res) => {
   dbService.loginAdministrador(req.body)
-    .then()
+    .then(async (administrador) => {
+      const imgUrl = await s3Client.getImgURL('defaultAdmin.png')
+      administrador[0].foto = imgUrl
+      res.json(administrador)
+    })
+    .catch(e => {
+      if (e.name === 'TypeError') {
+        res.status(401).send({ mensaje: "Datos incorrectos." })
+      }
+      else {
+        res.status(500).send(e)
+      }
+    })
 })
 
 app.post('/estudianteDatos', (req, res) => {
@@ -67,7 +85,9 @@ app.post('/administrador', (req, res) => {
 })
 
 app.patch('/administrador', (req, res) => {
-  // TODO
+  dbService.patchAdministrador(req.body)
+    .then(() => res.json({ mensaje: "Administrador editado." }))
+    .catch(e => res.status(500).send(e))
 })
 
 app.patch('/estudiante', upload.single('foto'), async (req, res) => {
@@ -205,7 +225,6 @@ app.post('/guardarFavoritos', (req, res) => {
   // TODO
 })
 
-// ? should this be post
 app.post('/obtenerFavoritos', (req, res) => {
   // TODO
 })
