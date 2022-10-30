@@ -90,6 +90,7 @@ app.patch('/administrador', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
+// TODO: if codigo is changed, also edit programa_estudiante, y programa_guardado
 app.patch('/estudiante', upload.single('foto'), async (req, res) => {
   // Si hay una foto en el request, subirla a S3
   if (req.file) {
@@ -132,12 +133,21 @@ app.post('/programas', upload.single('foto'), (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.patch('/programas', upload.single('foto'), (req, res) => {
-  // TODO
+app.patch('/programas', upload.single('foto'), async (req, res) => {
+  if (req.file) {
+    const imgKey = `programa/${req.body.id}`
+    await s3Client.upload(req.file, imgKey)
+  }
+
+  dbService.patchProgramas(req.body)
+    .then(() => res.json({ mensaje: "Programa editado." }))
+    .catch(e => res.status(500).send(e))
 })
 
 app.delete('/programas', (req, res) => {
-  // TODO
+  dbService.deleteProgramas(req.body)
+    .then(() => res.json({ mensaje: "Programa eliminado." }))
+    .catch(e => res.status(500).send(e))
 })
 
 app.get('/programas/:tipo', (req, res) => {
@@ -198,7 +208,6 @@ app.get('/programa/:tipo/:id', (req, res) => {
             const { id, nombre, descripcion, telefono, correo, institucion, tipo, clave_carrera } = p
             const imgKey = `programa/${id}`
             const imagen = await s3Client.getImgURL(imgKey)
-            console.log(imagen)
             resultado.push({
               id,
               nombre,

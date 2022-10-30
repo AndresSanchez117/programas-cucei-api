@@ -52,6 +52,7 @@ const databaseService = () => {
     })
   }
 
+  // TODO: if codigo update, change programa_estudiante and programa_guardado
   const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante, foto }) => {
     return knex('Estudiante')
       .where({
@@ -133,11 +134,59 @@ const databaseService = () => {
   }
 
   const patchProgramas = ({ id, nombre, descripcion, telefono, correo, institucion, tipo, carreras }) => {
-    // TODO
+    // TODO: try to make everytinhg work with a single transaction
+
+    if (carreras) {
+      return knex('Programa')
+        .where({
+          id
+        })
+        .update({
+          nombre,
+          descripcion,
+          telefono,
+          correo,
+          institucion,
+          tipo
+        }).then(() => {
+          return knex.transaction(trx => {
+            return trx('Programa_carrera').where({
+              id_programa: id
+            }).del().then(() => {
+              let carrerasObj = []
+              carreras.forEach(carrera => carrerasObj.push({ 'clave_carrera': carrera, 'id_programa': id }))
+
+              return trx('Programa_carrera').insert(carrerasObj)
+            })
+          })
+        })
+    }
+    else {
+      return knex('Programa')
+        .where({
+          id
+        })
+        .update({
+          nombre,
+          descripcion,
+          telefono,
+          correo,
+          institucion,
+          tipo
+        })
+    }
+
   }
 
+  // TODO: drop column estado from programa_carrera
   const deleteProgramas = ({ id }) => {
-    // TODO
+    return knex('Programa')
+      .where({
+        id
+      })
+      .update({
+        estado: 1
+      })
   }
 
   const getProgramasporTipo = ({ tipo }) => {
@@ -198,6 +247,7 @@ const databaseService = () => {
 
   const postGuardarFavoritos = ({ codigo_estudiante, id_programa }) => {
     // TODO
+
   }
 
   const postObtenerFavoritos = ({ codigo_estudiante }) => {
@@ -217,10 +267,16 @@ const databaseService = () => {
     getCarreras,
     postCarreras,
     postProgramas,
+    patchProgramas,
+    deleteProgramas,
     getProgramasporTipo,
     getPrograma,
     postAdministrador,
     patchAdministrador,
+    postGuardarFavoritos,
+    postObtenerFavoritos,
+    deleteFavoritos,
+    postRegistro,
     getLastProgramID
   }
 }
