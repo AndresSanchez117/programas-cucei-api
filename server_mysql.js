@@ -72,6 +72,16 @@ app.post('/estudianteDatos', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
+app.post('/administradorDatos', (req, res) => {
+  dbService.postAdministradorDatos(req.body)
+    .then(async (administrador) => {
+      const imgUrl = await s3Client.getImgURL('defaultAdmin.png')
+      administrador[0].foto = imgUrl
+      res.json(administrador)
+    })
+    .catch(e => res.status(500).send(e))
+})
+
 app.post('/estudiante', (req, res) => {
   dbService.postEstudiante(req.body)
     .then(() => res.json({ mensaje: "Estudiante creado." }))
@@ -153,6 +163,7 @@ app.delete('/programas', (req, res) => {
 app.get('/programas/:tipo', (req, res) => {
   dbService.getProgramasporTipo(req.params)
     .then(async programas => {
+      // TODO: refactor in a function to get 'resultado' based on 'programas'
       let resultado = []
 
       for (let p of programas) {
@@ -231,15 +242,55 @@ app.get('/programa/:tipo/:id', (req, res) => {
 })
 
 app.post('/guardarFavoritos', (req, res) => {
-  // TODO
+  dbService.postGuardarFavoritos(req.body)
+    .then(() => res.json({ mensaje: "Programa favorito guardado." }))
+    .catch(e => res.status(500).send(e))
 })
 
 app.post('/obtenerFavoritos', (req, res) => {
-  // TODO
+  dbService.postObtenerFavoritos(req.body)
+    .then(async programas => {
+      let resultado = []
+
+      for (let p of programas) {
+        try {
+          const programIndex = resultado.findIndex(el => el.id === p.id)
+
+          if (programIndex !== -1) {
+            const resultProgram = resultado[programIndex]
+            resultProgram.carreras.push(p.clave_carrera)
+            resultado[programIndex] = resultProgram
+          }
+          else {
+            const { id, nombre, descripcion, telefono, correo, institucion, tipo, clave_carrera } = p
+            const imagen = await s3Client.getImgURL(`programa/${id}`)
+            resultado.push({
+              id,
+              nombre,
+              descripcion,
+              telefono,
+              correo,
+              institucion,
+              imagen,
+              tipo,
+              carreras: clave_carrera ? [clave_carrera] : null
+            })
+          }
+        } catch (error) {
+          console.log('error' + error);
+        }
+      }
+
+      res.json(resultado)
+    })
+    .catch(e => res.status(500).send(e))
 })
 
+// TODO: drop 'estado' column from programa_guardado table
 app.delete('/eliminarFavoritos', (req, res) => {
-  // TODO
+  dbService.deleteFavoritos(req.body)
+    .then(() => res.json({ mensaje: "Programa favorito eliminado." }))
+    .catch(e => res.status(500).send(e))
 })
 
 app.post('/registro', (req, res) => {

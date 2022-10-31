@@ -99,6 +99,13 @@ const databaseService = () => {
       })
   }
 
+  const postAdministradorDatos = ({ id }) => {
+    return knex('Administrador').where({
+      id,
+      estado: 0
+    }).select()
+  }
+
   // CARRERAS
 
   const getCarreras = () => {
@@ -246,16 +253,46 @@ const databaseService = () => {
   // FAVORITOS
 
   const postGuardarFavoritos = ({ codigo_estudiante, id_programa }) => {
-    // TODO
-
+    return knex('Programa_guardado').insert({
+      codigo_estudiante,
+      id_programa
+    })
   }
 
   const postObtenerFavoritos = ({ codigo_estudiante }) => {
     // TODO
+    return knex('Programa')
+      .leftOuterJoin('Programa_carrera',
+        'Programa_carrera.id_programa',
+        '=',
+        'Programa.id')
+      .leftOuterJoin(
+        'Programa_guardado',
+        'Programa_guardado.id_programa',
+        '=',
+        'Programa.id'
+      )
+      .where({
+        'Programa_guardado.codigo_estudiante': codigo_estudiante,
+        'Programa.estado': 0
+      })
+      .select(
+        'Programa.id',
+        'Programa.nombre',
+        'Programa.descripcion',
+        'Programa.telefono',
+        'Programa.correo',
+        'Programa.institucion',
+        'Programa.tipo',
+        'Programa_carrera.clave_carrera'
+      )
   }
 
   const deleteFavoritos = ({ codigo_estudiante, id_programa }) => {
-    // TODO
+    return knex('Programa_guardado').where({
+      codigo_estudiante,
+      id_programa
+    }).del()
   }
 
   return {
@@ -272,6 +309,7 @@ const databaseService = () => {
     getProgramasporTipo,
     getPrograma,
     postAdministrador,
+    postAdministradorDatos,
     patchAdministrador,
     postGuardarFavoritos,
     postObtenerFavoritos,
