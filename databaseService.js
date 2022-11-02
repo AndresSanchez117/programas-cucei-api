@@ -196,6 +196,28 @@ const databaseService = () => {
       })
   }
 
+  const getProgramas = () => {
+    return knex('Programa')
+      .leftOuterJoin(
+        'Programa_carrera',
+        'Programa_carrera.id_programa',
+        '=',
+        'Programa.id')
+      .where({
+        'Programa.estado': 0
+      })
+      .select(
+        'Programa.id',
+        'Programa.nombre',
+        'Programa.descripcion',
+        'Programa.telefono',
+        'Programa.correo',
+        'Programa.institucion',
+        'Programa.tipo',
+        'Programa_carrera.clave_carrera'
+      )
+  }
+
   const getProgramasporTipo = ({ tipo }) => {
     return knex('Programa')
       .leftOuterJoin(
@@ -246,8 +268,42 @@ const databaseService = () => {
     return knex('Programa').max('id', { as: 'id' })
   }
 
-  const postRegistro = ({ codigo_estudiante, id_programa, fecha_registro }) => {
-    // TODO
+  const postRegistro = ({ codigo_estudiante, id_programa }) => {
+    return knex('Programa_estudiante').insert({
+      codigo_estudiante,
+      id_programa
+    }).then(() => {
+      return knex('Programa')
+        .leftOuterJoin(
+          'Programa_estudiante',
+          'Programa_estudiante.id_programa',
+          '=',
+          'Programa.id')
+        .leftOuterJoin(
+          'Estudiante',
+          'Estudiante.codigo',
+          '=',
+          'Programa_estudiante.codigo_estudiante'
+        )
+        .where({
+          'Estudiante.codigo': codigo_estudiante,
+          'Programa.id': id_programa
+        })
+        .column(
+          { nombre_programa: 'Programa.nombre' },
+          'Programa.correo',
+          'Programa.institucion',
+          'Programa.tipo',
+          'Estudiante.codigo',
+          { nombre_estudiante: 'Estudiante.nombre' },
+          'Estudiante.primer_apellido',
+          'Estudiante.segundo_apellido',
+          'Estudiante.clave_carrera',
+          'Estudiante.num_semestre',
+          'Estudiante.estatus',
+          'Estudiante.correo_estudiante'
+        ).select()
+    })
   }
 
   // FAVORITOS
@@ -260,7 +316,6 @@ const databaseService = () => {
   }
 
   const postObtenerFavoritos = ({ codigo_estudiante }) => {
-    // TODO
     return knex('Programa')
       .leftOuterJoin('Programa_carrera',
         'Programa_carrera.id_programa',
@@ -306,6 +361,7 @@ const databaseService = () => {
     postProgramas,
     patchProgramas,
     deleteProgramas,
+    getProgramas,
     getProgramasporTipo,
     getPrograma,
     postAdministrador,

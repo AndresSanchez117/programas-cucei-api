@@ -7,6 +7,17 @@ const cors = require('cors')
 const multer = require('multer')
 const { databaseService } = require('./databaseService')
 const s3Client = require('./s3Client')
+const nodemailer = require('nodemailer')
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  }
+});
 
 const app = express()
 const dbService = databaseService()
@@ -160,6 +171,46 @@ app.delete('/programas', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
+app.get('/programas', (req, res) => {
+  dbService.getProgramas()
+    .then(async programas => {
+      // TODO: refactor in a function to get 'resultado' based on 'programas'
+      let resultado = []
+
+      for (let p of programas) {
+        try {
+          const programIndex = resultado.findIndex(el => el.id === p.id)
+
+          if (programIndex !== -1) {
+            const resultProgram = resultado[programIndex]
+            resultProgram.carreras.push(p.clave_carrera)
+            resultado[programIndex] = resultProgram
+          }
+          else {
+            const { id, nombre, descripcion, telefono, correo, institucion, tipo, clave_carrera } = p
+            const imagen = await s3Client.getImgURL(`programa/${id}`)
+            resultado.push({
+              id,
+              nombre,
+              descripcion,
+              telefono,
+              correo,
+              institucion,
+              imagen,
+              tipo,
+              carreras: clave_carrera ? [clave_carrera] : null
+            })
+          }
+        } catch (error) {
+          console.log('error' + error);
+        }
+      }
+
+      res.json(resultado)
+    })
+    .catch(e => res.status(500).send(e))
+})
+
 app.get('/programas/:tipo', (req, res) => {
   dbService.getProgramasporTipo(req.params)
     .then(async programas => {
@@ -293,8 +344,55 @@ app.delete('/eliminarFavoritos', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
+// TODO: check if error is for duplicate key and send appropiate error message to the client
 app.post('/registro', (req, res) => {
-  // TODO
+  dbService.postRegistro(req.body)
+    .then(infoRegistro => {
+
+      // ? Change email provider to Amazon SES? 
+      const institutionMailOptions = {
+        from: process.env.EMAIL_USER,
+        to: infoRegistro[0].correo,
+        subject: 'Registro de estudiante a programa',
+        html: `<h1>Nuevo registro en Programas CUCEI</h1>
+        <p>Registro realizado a ${infoRegistro[0].nombre_programa}.</p>
+        <p>El usuario registrado es ${infoRegistro[0].nombre_estudiante} ${infoRegistro[0].primer_apellido} ${infoRegistro[0].segundo_apellido}. Estudiante ${infoRegistro[0].estatus}/a de la carrera ${infoRegistro[0].clave_carrera}</p>
+        <p>Para ponerse en contacto con el estudiante comuníquese a ${infoRegistro[0].correo_estudiante}.</p>
+        <p>Saludos cordiales,</p>
+        <p>Programas CUCEI.</p>`
+      }
+
+      transporter.sendMail(institutionMailOptions, (error, info) => {
+        if (error) {
+          console.log(error)
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      })
+
+      const userMailOptions = {
+        from: process.env.EMAIL_USER,
+        to: infoRegistro[0].correo_estudiante,
+        subject: `Registro realizado a ${infoRegistro[0].nombre_programa}`,
+        html: `<h1>Registro realizado</h1>
+        <p>Saludos ${infoRegistro[0].nombre_estudiante}</p>
+        <p>Se te informa que has realizado tu registro a ${infoRegistro[0].nombre_programa} ofrecido por ${infoRegistro[0].institucion}. La institución se pondrá pronto en contacto contigo una vez haya evaluado tu registro.</p>
+        <p>Para más informción de este programa, o para explorar más programas sigue visitando Programas CUCEI.</p>
+        <p>Gracias,</p>
+        <p>Programas CUCEI.</p>`
+      }
+
+      transporter.sendMail(userMailOptions, (error, info) => {
+        if (error) {
+          console.log(error)
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      })
+
+      res.json({ mensaje: "Registrado exitosamente." })
+    })
+    .catch(e => res.status(500).send(e))
 })
 
 
