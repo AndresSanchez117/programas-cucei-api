@@ -356,7 +356,7 @@ app.post('/registro', (req, res) => {
         subject: 'Registro de estudiante a programa',
         html: `<h1>Nuevo registro en Programas CUCEI</h1>
         <p>Registro realizado a ${infoRegistro[0].nombre_programa}.</p>
-        <p>El usuario registrado es ${infoRegistro[0].nombre_estudiante} ${infoRegistro[0].primer_apellido} ${infoRegistro[0].segundo_apellido}. Estudiante ${infoRegistro[0].estatus}/a de la carrera ${infoRegistro[0].clave_carrera}</p>
+        <p>El usuario registrado es ${infoRegistro[0].nombre_estudiante} ${infoRegistro[0].primer_apellido} ${infoRegistro[0].segundo_apellido}. Estudiante ${infoRegistro[0].estatus}/a de la carrera ${infoRegistro[0].clave_carrera}, en el ${infoRegistro[0].num_semestre} semestre.</p>
         <p>Para ponerse en contacto con el estudiante comuníquese a ${infoRegistro[0].correo_estudiante}.</p>
         <p>Saludos cordiales,</p>
         <p>Programas CUCEI.</p>`
@@ -375,7 +375,7 @@ app.post('/registro', (req, res) => {
         to: infoRegistro[0].correo_estudiante,
         subject: `Registro realizado a ${infoRegistro[0].nombre_programa}`,
         html: `<h1>Registro realizado</h1>
-        <p>Saludos ${infoRegistro[0].nombre_estudiante}</p>
+        <p>Saludos ${infoRegistro[0].nombre_estudiante},</p>
         <p>Se te informa que has realizado tu registro a ${infoRegistro[0].nombre_programa} ofrecido por ${infoRegistro[0].institucion}. La institución se pondrá pronto en contacto contigo una vez haya evaluado tu registro.</p>
         <p>Para más informción de este programa, o para explorar más programas sigue visitando Programas CUCEI.</p>
         <p>Gracias,</p>
