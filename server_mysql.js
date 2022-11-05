@@ -93,7 +93,10 @@ app.post('/administradorDatos', (req, res) => {
     .catch(e => res.status(500).send(e))
 })
 
-app.post('/estudiante', (req, res) => {
+app.post('/estudiante', upload.single('cv'), async (req, res) => {
+  const imgKey = `${req.body.codigo}/cv`
+  await s3Client.upload(req.file, imgKey)
+
   dbService.postEstudiante(req.body)
     .then(() => res.json({ mensaje: "Estudiante creado." }))
     .catch(e => res.status(500).send(e))
@@ -112,16 +115,23 @@ app.patch('/administrador', (req, res) => {
 })
 
 // TODO: if codigo is changed, also edit programa_estudiante, y programa_guardado
-app.patch('/estudiante', upload.single('foto'), async (req, res) => {
+// TODO: validate file types
+app.patch('/estudiante', upload.fields([{ name: 'foto', maxCount: 1 }, { name: 'cv', maxCount: 1 }]), async (req, res) => {
   // Si hay una foto en el request, subirla a S3
-  if (req.file) {
+  if (req.files.foto[0]) {
     const codigoFinal = req.body.codigo ? req.body.codigo : req.body.codigoOri
     const imgKey = `${codigoFinal}/perfil`
-    await s3Client.upload(req.file, imgKey)
+    await s3Client.upload(req.files.foto[0], imgKey)
 
     req.body.foto = imgKey
   }
 
+  if (req.files.cv[0]) {
+    const codigoFinal = req.body.codigo ? req.body.codigo : req.body.codigoOri
+    const imgKey = `${codigoFinal}/cv`
+    await s3Client.upload(req.files.cv[0], imgKey)
+  }
+  Estudian
   dbService.patchEstudiante(req.body)
     .then(() => res.json({ mensaje: "Estudiante editado." }))
     .catch(e => res.status(500).send(e))
