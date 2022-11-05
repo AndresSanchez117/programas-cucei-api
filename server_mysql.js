@@ -41,6 +41,10 @@ app.post('/login', (req, res) => {
 
       estudiante[0].foto = imgUrl
 
+      const cvUrl = await s3Client.getImgURL(`${estudiante[0].codigo}/cv`)
+
+      estudiante[0].cv = cvUrl
+
       res.json(estudiante)
     })
     .catch(e => {
@@ -77,6 +81,10 @@ app.post('/estudianteDatos', (req, res) => {
       const imgUrl = await s3Client.getImgURL(imgKey)
 
       estudiante[0].foto = imgUrl
+
+      const cvUrl = await s3Client.getImgURL(`${estudiante[0].codigo}/cv`)
+
+      estudiante[0].cv = cvUrl
 
       res.json(estudiante)
     })
@@ -118,7 +126,7 @@ app.patch('/administrador', (req, res) => {
 // TODO: validate file types
 app.patch('/estudiante', upload.fields([{ name: 'foto', maxCount: 1 }, { name: 'cv', maxCount: 1 }]), async (req, res) => {
   // Si hay una foto en el request, subirla a S3
-  if (req.files.foto[0]) {
+  if (req.files.foto) {
     const codigoFinal = req.body.codigo ? req.body.codigo : req.body.codigoOri
     const imgKey = `${codigoFinal}/perfil`
     await s3Client.upload(req.files.foto[0], imgKey)
@@ -126,12 +134,12 @@ app.patch('/estudiante', upload.fields([{ name: 'foto', maxCount: 1 }, { name: '
     req.body.foto = imgKey
   }
 
-  if (req.files.cv[0]) {
+  if (req.files.cv) {
     const codigoFinal = req.body.codigo ? req.body.codigo : req.body.codigoOri
     const imgKey = `${codigoFinal}/cv`
     await s3Client.upload(req.files.cv[0], imgKey)
   }
-  Estudian
+
   dbService.patchEstudiante(req.body)
     .then(() => res.json({ mensaje: "Estudiante editado." }))
     .catch(e => res.status(500).send(e))
@@ -357,7 +365,9 @@ app.delete('/eliminarFavoritos', (req, res) => {
 // TODO: check if error is for duplicate key and send appropiate error message to the client
 app.post('/registro', (req, res) => {
   dbService.postRegistro(req.body)
-    .then(infoRegistro => {
+    .then(async infoRegistro => {
+
+      const cvUrl = await s3Client.getImgURL(`${infoRegistro[0].codigo}/cv`)
 
       // ? Change email provider to Amazon SES? 
       const institutionMailOptions = {
@@ -367,6 +377,7 @@ app.post('/registro', (req, res) => {
         html: `<h1>Nuevo registro en Programas CUCEI</h1>
         <p>Registro realizado a ${infoRegistro[0].nombre_programa}.</p>
         <p>El usuario registrado es ${infoRegistro[0].nombre_estudiante} ${infoRegistro[0].primer_apellido} ${infoRegistro[0].segundo_apellido}. Estudiante ${infoRegistro[0].estatus}/a de la carrera ${infoRegistro[0].clave_carrera}, en el ${infoRegistro[0].num_semestre} semestre.</p>
+        <a href=${cvUrl}>Revise el curriculum del estudiante aquí!</a>
         <p>Para ponerse en contacto con el estudiante comuníquese a ${infoRegistro[0].correo_estudiante}.</p>
         <p>Saludos cordiales,</p>
         <p>Programas CUCEI.</p>`
