@@ -37,13 +37,14 @@ const databaseService = () => {
     }).select()
   }
 
-  const postEstudiante = ({ codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
+  const postEstudiante = ({ codigo, nombre, primer_apellido, segundo_apellido, contrasena, descripcion, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante }) => {
     return knex('Estudiante').insert({
       codigo: codigo,
       nombre: nombre,
       primer_apellido: primer_apellido,
       segundo_apellido: segundo_apellido,
       contrasena: contrasena,
+      descripcion: descripcion,
       clave_carrera: clave_carrera,
       ciclo_escolar: ciclo_escolar,
       num_semestre: num_semestre,
@@ -53,7 +54,7 @@ const databaseService = () => {
   }
 
   // TODO: if codigo update, change programa_estudiante and programa_guardado
-  const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante, foto }) => {
+  const patchEstudiante = ({ codigoOri, codigo, nombre, primer_apellido, segundo_apellido, contrasena, descripcion, clave_carrera, ciclo_escolar, num_semestre, estatus, correo_estudiante, foto }) => {
     return knex('Estudiante')
       .where({
         'Estudiante.codigo': codigoOri
@@ -64,6 +65,7 @@ const databaseService = () => {
         primer_apellido: primer_apellido,
         segundo_apellido: segundo_apellido,
         contrasena: contrasena,
+        descripcion: descripcion,
         clave_carrera: clave_carrera,
         ciclo_escolar: ciclo_escolar,
         num_semestre: num_semestre,
